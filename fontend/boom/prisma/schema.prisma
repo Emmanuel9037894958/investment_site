@@ -1,0 +1,86 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------- ENUMS ----------------
+enum Role {
+  USER
+  ADMIN
+}
+
+// ---------------- USERS ----------------
+model User {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  password    String
+  name        String
+  role        Role          @default(USER)
+  balance     Float         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relationships
+  transactions Transaction[]
+  investments  Investment[]
+  referrals    Referral[]   @relation("Referrer")
+  referredBy   Referral?    @relation("Referred")
+}
+
+// ---------------- REFERRALS ----------------
+model Referral {
+  id          Int      @id @default(autoincrement())
+  bonus       Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  // Who referred
+  referrer   User @relation("Referrer", fields: [referrerId], references: [id])
+  referrerId Int
+
+  // Who was referred
+  referred   User @relation("Referred", fields: [referredId], references: [id])
+  referredId Int  @unique
+}
+
+// ---------------- TRANSACTIONS ----------------
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  type      String   // "deposit" | "withdrawal" | "investment"
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+// ---------------- INVESTMENT PLANS ----------------
+model Plan {
+  id          Int      @id @default(autoincrement())
+  name        String
+  percentage  Float    // e.g. 5 means 5% return
+  duration    Int      // in days, e.g. 30 = 30 days
+  createdAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
+
+  investments Investment[]
+}
+
+// ---------------- INVESTMENTS ----------------
+model Investment {
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  createdAt   DateTime @default(now())
+  status      String   // "active" | "completed"
+
+  // Relations
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  plan   Plan @relation(fields: [planId], references: [id])
+  planId Int
+}
