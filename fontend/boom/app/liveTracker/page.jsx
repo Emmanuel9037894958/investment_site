@@ -1,19 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-export default function liveTracker() {
+export default function TradingViewChart({
+  symbol = "NASDAQ:AAPL",
+}) {
+  const containerRef = useRef(null);
+
   useEffect(() => {
-    // Load TradingView Widget Script
+    if (!containerRef.current) return;
+
+    containerRef.current.innerHTML = "";
+
     const script = document.createElement("script");
+
     script.src = "https://s3.tradingview.com/tv.js";
     script.async = true;
+
     script.onload = () => {
+      if (
+        !window.TradingView ||
+        !containerRef.current
+      ) {
+        return;
+      }
+
       new window.TradingView.widget({
-        container_id: "tradingview_chart",
+        container_id: containerRef.current.id,
         width: "100%",
-        height: "600",
-        symbol: "NASDAQ:AAPL", // Change to OIL, BTC, etc.
+        height: 600,
+        symbol,
         interval: "1",
         timezone: "Etc/UTC",
         theme: "dark",
@@ -23,15 +39,26 @@ export default function liveTracker() {
         enable_publishing: false,
         hide_side_toolbar: false,
         allow_symbol_change: true,
+        autosize: true,
       });
     };
-    document.body.appendChild(script);
-  }, []);
+
+    containerRef.current.appendChild(script);
+
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = "";
+      }
+    };
+  }, [symbol]);
 
   return (
-    <div className="w-full min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold text-white mb-6">Live Market Tracker</h1>
-      <div id="tradingview_chart" className="w-full max-w-6xl h-[600px]"></div>
+    <div className="w-full overflow-hidden rounded-xl bg-gray-900">
+      <div
+        ref={containerRef}
+        id="tradingview_chart"
+        className="h-[600px] w-full"
+      />
     </div>
   );
 }

@@ -27,7 +27,6 @@
     "dotenv": "^17.2.1",
     "firebase": "^12.3.0",
     "firebase-admin": "^14.5.0",
-    "flutterwave-react-v3": "^1.0.7",
     "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.540.0",
