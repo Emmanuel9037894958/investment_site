@@ -65,7 +65,7 @@ export default function RefilerPage() {
           Share your unique referral link with friends and family. For every{" "}
           <span className="font-semibold text-orange-600">5 people</span> you
           refer who successfully join and invest, you all earn{" "}
-          <span className="font-semibold text-green-600">$50 bonus</span>{" "}
+          <span className="font-semibold text-green-600">$80 bonus</span>{" "}
           directly into your wallet.
         </p>
 

@@ -34,7 +34,7 @@ export default function Hero() {
     }
   }, [loading]);
 
-  /* ✨ 4–Dot Loader Component */
+  
   const DotLoader = () => {
     const dots = [0, 1, 2, 3];
     return (
