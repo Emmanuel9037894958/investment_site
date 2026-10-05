@@ -42,11 +42,12 @@
     "react-intersection-observer": "^9.16.0",
     "react-paystack": "^6.0.0",
     "recharts": "^3.2.1",
-    "stripe": "^18.4.0"
+    "stripe": "^18.4.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.1.12",
+    "@tailwindcss/postcss": "^4.3.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "prisma": "^6.14.0"
