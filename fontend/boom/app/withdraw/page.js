@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -26,34 +26,25 @@ export default function WithdrawPage() {
 
   const [withdrawals, setWithdrawals] = useState([]);
   const [balance, setBalance] = useState(0);
-
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   // ==========================================
-  // LOAD USER DATA
+  // GET TOKEN
   // ==========================================
-
-  useEffect(() => {
-    loadWithdrawals();
-    loadUserBalance();
-  }, []);
-
   const getToken = () => {
     if (typeof window === "undefined") {
       return null;
     }
-
     return localStorage.getItem("token");
   };
 
   // ==========================================
   // LOAD WITHDRAWALS
   // ==========================================
-
-  const loadWithdrawals = async () => {
+  const loadWithdrawals = useCallback(async () => {
     const token = getToken();
 
     if (!token) {
@@ -83,13 +74,12 @@ export default function WithdrawPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // ==========================================
   // LOAD BALANCE
   // ==========================================
-
-  const loadUserBalance = async () => {
+  const loadUserBalance = useCallback(async () => {
     const token = getToken();
 
     if (!token) return;
@@ -109,12 +99,19 @@ export default function WithdrawPage() {
     } catch (err) {
       console.error("Load balance error:", err);
     }
-  };
+  }, []);
+
+  // ==========================================
+  // LOAD USER DATA
+  // ==========================================
+  useEffect(() => {
+    loadWithdrawals();
+    loadUserBalance();
+  }, [loadWithdrawals, loadUserBalance]);
 
   // ==========================================
   // HANDLE INPUT
   // ==========================================
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -130,7 +127,6 @@ export default function WithdrawPage() {
   // ==========================================
   // SUBMIT WITHDRAWAL
   // ==========================================
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -147,7 +143,9 @@ export default function WithdrawPage() {
     }
 
     if (amount > balance) {
-      setError("Your withdrawal amount is greater than your available balance.");
+      setError(
+        "Your withdrawal amount is greater than your available balance."
+      );
       return;
     }
 
@@ -215,7 +213,6 @@ export default function WithdrawPage() {
   // ==========================================
   // STATUS
   // ==========================================
-
   const getStatusIcon = (status) => {
     if (status === "paid") {
       return <CheckCircle2 className="h-5 w-5 text-emerald-400" />;
@@ -259,7 +256,6 @@ export default function WithdrawPage() {
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* HEADER */}
-
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Link
@@ -270,9 +266,7 @@ export default function WithdrawPage() {
               Back to dashboard
             </Link>
 
-            <h1 className="text-3xl font-bold sm:text-4xl">
-              Withdraw Funds
-            </h1>
+            <h1 className="text-3xl font-bold sm:text-4xl">Withdraw Funds</h1>
 
             <p className="mt-2 text-sm text-slate-400">
               Request a withdrawal from your available Energy-Vest balance.
@@ -291,14 +285,11 @@ export default function WithdrawPage() {
         </div>
 
         {/* ALERTS */}
-
         {message && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
 
-            <p className="text-sm leading-6 text-emerald-300">
-              {message}
-            </p>
+            <p className="text-sm leading-6 text-emerald-300">{message}</p>
           </div>
         )}
 
@@ -306,24 +297,19 @@ export default function WithdrawPage() {
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
 
-            <p className="text-sm leading-6 text-red-300">
-              {error}
-            </p>
+            <p className="text-sm leading-6 text-red-300">{error}</p>
           </div>
         )}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
           {/* WITHDRAW FORM */}
-
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8">
             <div className="mb-7">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10">
                 <Wallet className="h-6 w-6 text-emerald-400" />
               </div>
 
-              <h2 className="text-xl font-bold">
-                New withdrawal
-              </h2>
+              <h2 className="text-xl font-bold">New withdrawal</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 Enter the amount and destination wallet for your withdrawal.
@@ -332,7 +318,6 @@ export default function WithdrawPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* AMOUNT */}
-
               <div>
                 <label
                   htmlFor="amount"
@@ -362,7 +347,6 @@ export default function WithdrawPage() {
               </div>
 
               {/* CRYPTO */}
-
               <div>
                 <label
                   htmlFor="crypto_currency"
@@ -386,7 +370,6 @@ export default function WithdrawPage() {
               </div>
 
               {/* NETWORK */}
-
               <div>
                 <label
                   htmlFor="network"
@@ -410,7 +393,6 @@ export default function WithdrawPage() {
               </div>
 
               {/* WALLET */}
-
               <div>
                 <label
                   htmlFor="wallet_address"
@@ -432,7 +414,6 @@ export default function WithdrawPage() {
               </div>
 
               {/* SUBMIT */}
-
               <button
                 type="submit"
                 disabled={submitting || loading}
@@ -461,12 +442,9 @@ export default function WithdrawPage() {
           </section>
 
           {/* WITHDRAWAL HISTORY */}
-
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl sm:p-8">
             <div className="mb-7">
-              <h2 className="text-xl font-bold">
-                Withdrawal history
-              </h2>
+              <h2 className="text-xl font-bold">Withdrawal history</h2>
 
               <p className="mt-2 text-sm text-slate-500">
                 View your previous and pending withdrawal requests.
@@ -535,9 +513,7 @@ export default function WithdrawPage() {
                       </div>
 
                       <div>
-                        <p className="text-xs text-slate-600">
-                          Network
-                        </p>
+                        <p className="text-xs text-slate-600">Network</p>
 
                         <p className="mt-1 text-sm font-medium text-slate-300">
                           {withdrawal.network}
@@ -568,9 +544,7 @@ export default function WithdrawPage() {
                       </div>
 
                       <div>
-                        <p className="text-xs text-slate-600">
-                          Submitted
-                        </p>
+                        <p className="text-xs text-slate-600">Submitted</p>
 
                         <p className="mt-1 text-xs text-slate-400">
                           {formatDate(withdrawal.created_at)}
