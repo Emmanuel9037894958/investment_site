@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -20,8 +21,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+const API_BASE = "";
 
 const PLANS = [
   {
@@ -87,8 +87,8 @@ export default function InvestmentsPage() {
       return;
     }
 
-    if (!Number.isFinite(amount) || amount < 1) {
-      setFormError("Enter an amount of at least $1.");
+    if (!Number.isFinite(amount) || amount < 1 || amount > 1000000) {
+      setFormError("Enter an amount between $1 and $1,000,000.");
       return;
     }
 
@@ -97,7 +97,6 @@ export default function InvestmentsPage() {
 
   return (
     <main className="min-h-screen bg-[#f5f6f8] text-slate-900">
-      {/* Header */}
       <header className="border-b border-white/10 bg-[#101b30]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -123,7 +122,6 @@ export default function InvestmentsPage() {
         </div>
       </header>
 
-      {/* Intro */}
       <section className="bg-[#101b30]">
         <div className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12 lg:px-8">
           <div className="max-w-3xl">
@@ -146,10 +144,8 @@ export default function InvestmentsPage() {
         </div>
       </section>
 
-      {/* Main content */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <form onSubmit={handleOpenModal}>
-          {/* Plans */}
           <div>
             <div className="mb-5">
               <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
@@ -175,7 +171,6 @@ export default function InvestmentsPage() {
                         ...previous,
                         plan: plan.value,
                       }));
-
                       setFormError("");
                     }}
                     aria-pressed={active}
@@ -258,7 +253,6 @@ export default function InvestmentsPage() {
             </div>
           </div>
 
-          {/* Amount and summary */}
           <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_360px] lg:gap-8">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
               <div className="flex items-center gap-3">
@@ -304,7 +298,6 @@ export default function InvestmentsPage() {
                       ...previous,
                       amount: e.target.value,
                     }));
-
                     setFormError("");
                   }}
                   className="w-full rounded-xl border border-slate-200 bg-white py-4 pl-10 pr-4 text-xl font-bold text-slate-900 outline-none transition placeholder:text-base placeholder:font-normal placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100"
@@ -322,7 +315,6 @@ export default function InvestmentsPage() {
                         ...previous,
                         amount: String(value),
                       }));
-
                       setFormError("");
                     }}
                     className={`rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${
@@ -344,7 +336,6 @@ export default function InvestmentsPage() {
               )}
             </div>
 
-            {/* Order summary */}
             <aside className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
               <h2 className="text-lg font-bold text-slate-900">
                 Order summary
@@ -569,7 +560,11 @@ function NowPaymentsPay({ amount, plan, onClose }) {
 
     const numericAmount = Number(amount);
 
-    if (!Number.isFinite(numericAmount) || numericAmount < 1) {
+    if (
+      !Number.isFinite(numericAmount) ||
+      numericAmount < 1 ||
+      numericAmount > 1000000
+    ) {
       setError("Please enter a valid payment amount.");
       return;
     }
@@ -584,7 +579,8 @@ function NowPaymentsPay({ amount, plan, onClose }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${API_BASE}/deposits`, {
+      // Send the request to the Next.js API route.
+      const response = await fetch("/api/deposits", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -611,15 +607,15 @@ function NowPaymentsPay({ amount, plan, onClose }) {
         );
       }
 
-      setPayment(data.deposit);
-
+      // Redirect directly to NOWPayments checkout.
       if (data.deposit.payment_url) {
-        window.open(
-          data.deposit.payment_url,
-          "_blank",
-          "noopener,noreferrer"
-        );
+        window.location.href = data.deposit.payment_url;
+        return;
       }
+
+      // Keep the payment instructions available if the API
+      // returns a payment address but no hosted checkout URL.
+      setPayment(data.deposit);
     } catch (err) {
       console.error("Crypto payment error:", err);
 
