@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import {
   Info,
@@ -10,63 +11,60 @@ import {
   BarChart3,
   DollarSign,
   Globe,
-  Users,
+  Quote,
 } from "lucide-react";
 import Invest from "./Invest";
 
-// 🔹 Cards Data
 const cards = [
   {
     id: 1,
-    icon: <Info className="w-10 h-10 text-orange-500" />,
+    icon: Info,
     title: "About Us",
     text: "Trusted investment platform focused on innovation and transparency.",
   },
   {
     id: 2,
-    icon: <Briefcase className="w-10 h-10 text-orange-500" />,
+    icon: Briefcase,
     title: "Our Services",
     text: "From oil & gas to sustainable investments, we provide global solutions.",
   },
   {
     id: 3,
-    icon: <MessageSquare className="w-10 h-10 text-orange-500" />,
+    icon: MessageSquare,
     title: "Get in Touch",
     text: "We are here to answer your questions and guide your investment journey.",
   },
   {
     id: 4,
-    icon: <TrendingUp className="w-10 h-10 text-orange-500" />,
+    icon: TrendingUp,
     title: "Investment Plans",
     text: "Flexible plans designed to help you achieve financial freedom.",
   },
 ];
 
-// 🔹 Features Data
 const features = [
   {
-    icon: <ShieldCheck className="w-8 h-8 text-orange-500" />,
+    icon: ShieldCheck,
     title: "Secure & Trusted",
     desc: "We prioritize security and transparency, ensuring your funds are always safe.",
   },
   {
-    icon: <BarChart3 className="w-8 h-8 text-orange-500" />,
+    icon: BarChart3,
     title: "Smart Analytics",
     desc: "Track investments in real-time with advanced analytics and reports.",
   },
   {
-    icon: <DollarSign className="w-8 h-8 text-orange-500" />,
+    icon: DollarSign,
     title: "Profitable Growth",
     desc: "Get access to high-return opportunities backed by expert strategies.",
   },
   {
-    icon: <Globe className="w-8 h-8 text-orange-500" />,
+    icon: Globe,
     title: "Global Reach",
     desc: "Invest across multiple industries and global markets with ease.",
   },
 ];
 
-// 🔹 Testimonials
 const testimonials = [
   {
     name: "Michael O.",
@@ -84,132 +82,236 @@ const testimonials = [
 
 function LearnMore() {
   return (
-    <div className="bg-gray-50 sm:px-10 md:px-20 py-16">
-      {/* 🔹 Heading */}
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 text-center">
-        Learn More About{" "}
-        <span className="text-orange-500">Energy-vest</span>
-      </h2>
-      <p className="text-center mt-4 text-gray-600 max-w-2xl mx-auto text-lg">
-        At Energy-vest, we go beyond ordinary investment opportunities. 
-        We empower our clients with reliable, transparent, and global 
-        investment solutions designed to secure financial freedom.
-      </p>
+    <main className="w-full overflow-hidden bg-[#f7f8fa] text-gray-900">
+      {/* HERO / INTRO */}
+      <section className="w-full px-4 sm:px-6 sm:py-20 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="mx-auto w-full max-w-[1600px]">
+          <div className="mx-auto max-w-4xl text-center">
 
-      {/* 🔹 Cards Section */}
-      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {cards.map((card) => (
-          <div
-            key={card.id}
-            className="flex flex-col items-center text-center border rounded-lg shadow-md p-6 bg-white transition-all hover:shadow-lg hover:shadow-orange-500/40"
-          >
-            {card.icon}
-            <h3 className="mt-4 text-lg font-semibold text-gray-800">
-              {card.title}
-            </h3>
-            <p className="mt-2 text-gray-600 text-sm">{card.text}</p>
+            <h2 className="mt-6 text-3xl font-extrabold leading-[1.08] tracking-tight text-gray-950 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+              Learn More About{" "}
+              <span className="text-orange-500">Energy-vest</span>
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-gray-600 sm:text-lg sm:leading-8 md:text-xl">
+              At Energy-vest, we go beyond ordinary investment opportunities.
+              We empower our clients with reliable, transparent, and global
+              investment solutions designed to secure financial freedom.
+            </p>
           </div>
-        ))}
-      </div>
 
-      {/* 🔹 Trust Section */}
-      <div className="bg-gray-50 px-6 sm:px-10 md:px-20 py-16">
-        <div className="max-w-5xl mx-auto text-center md:text-left">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-snug">
-            TRUST, <span className="text-orange-500">Security</span>, 
-            Prosperity, Insight, Success.
-          </h3>
-          <p className="mt-6 text-gray-700 text-base sm:text-lg md:text-xl text-justify">
-            We are a global financial institution specializing in diversified investment 
-            activities across both traditional financial markets and the rapidly evolving 
-            digital asset space. Our operations are powered by a team of highly skilled 
-            professional traders with deep expertise in equities, commodities, foreign 
-            exchange, and cryptocurrency exchanges — delivering reliable strategies 
-            designed for long-term growth and stability.
-          </p>
+          {/* QUICK LINKS - Flowing on page without card boxes */}
+          <div className="mt-6 grid w-full grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {cards.map((card) => {
+              const Icon = card.icon;
+
+              return (
+                <div key={card.id} className="flex flex-col items-start">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+                    <Icon className="h-7 w-7" />
+                  </div>
+
+                  <h3 className="mt-5 text-xl font-bold text-gray-900">
+                    {card.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
+                    {card.text}
+                  </p>
+
+                  <div className="mt-4">
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 cursor-pointer hover:underline">
+                      Explore
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <button
-          className="flex items-center justify-center gap-2 bg-black text-white 
-             rounded-lg h-12 w-44 font-medium shadow-md 
-             hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-400/50 
-             transition-all duration-300 ease-in-out mt-6 mx-auto md:mx-0"
-        >
-          Learn More <ArrowRight className="w-5 h-5" />
-        </button>
-      </div>
+      </section>
 
-      {/* 🔹 Features Section */}
-      <div className="py-16">
-        <h3 className="text-3xl font-bold text-center text-gray-800">
-          Why Choose <span className="text-orange-500">Us</span>
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="border rounded-lg shadow-md bg-white p-6 flex flex-col items-center text-center hover:shadow-lg transition"
-            >
-              {feature.icon}
-              <h4 className="mt-4 text-lg font-semibold text-gray-800">
-                {feature.title}
-              </h4>
-              <p className="mt-2 text-gray-600 text-sm">{feature.desc}</p>
+      {/* TRUST / SECURITY */}
+      <section className="w-full border-y border-gray-200 bg-white">
+        <div className="mx-auto grid w-full max-w-[1700px] grid-cols-1 gap-10 px-4 py-8 sm:px-6 sm:py-20 md:px-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-16 xl:px-24 2xl:px-32">
+          <div>
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
+              Our Commitment
+            </span>
+
+            <h3 className="mt-4 text-3xl font-extrabold leading-tight text-gray-950 sm:text-4xl md:text-5xl">
+              TRUST,{" "}
+              <span className="text-orange-500">Security</span>, Prosperity,
+              Insight, Success.
+            </h3>
+
+            {/* <div className="mt-6 h-1 w-20 rounded-full bg-orange-500" /> */}
+          </div>
+
+          <div>
+            <p className="text-base leading-7 text-gray-600 sm:text-lg sm:leading-8 md:text-xl">
+              We are a global financial institution specializing in diversified
+              investment activities across both traditional financial markets
+              and the rapidly evolving digital asset space. Our operations are
+              powered by a team of highly skilled professional traders with
+              deep expertise in equities, commodities, foreign exchange, and
+              cryptocurrency exchanges ,delivering reliable strategies
+              designed for long-term growth and stability.
+            </p>
+
+            <button className="group mt-8 inline-flex h-12 items-center justify-center gap-3 rounded-xl bg-gray-950 px-7 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:bg-orange-500 hover:shadow-orange-500/20 sm:h-14 sm:px-8 sm:text-base">
+              Learn More
+              <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="w-full px-4 py-6 sm:px-6 sm:py-20 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="mx-auto w-full max-w-[1600px]">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
+              Why Energy-vest
+            </span>
+
+            <h3 className="mt-3 text-3xl font-extrabold text-gray-950 sm:text-4xl md:text-5xl">
+              Why Choose <span className="text-orange-500">Us</span>
+            </h3>
+
+            <p className="mt-4 text-base leading-7 text-gray-600 sm:text-lg">
+              Built around security, insight, accessibility, and opportunities
+              across global markets.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+
+              return (
+                <div key={index} className="flex flex-col items-start">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-950 text-orange-400">
+                    <Icon className="h-7 w-7" />
+                  </div>
+
+                  <h4 className="mt-5 text-xl font-bold text-gray-900">
+                    {feature.title}
+                  </h4>
+
+                  <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
+                    {feature.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* VIDEO */}
+      <section className="w-full bg-gray-950 px-4 py-16 sm:px-6 sm:py-20 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="mx-auto w-full max-w-[1300px]">
+          <div className="mb-10 text-center">
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+              Discover Energy-vest
+            </span>
+
+            <h3 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl md:text-5xl">
+              See How We Operate
+            </h3>
+          </div>
+
+          <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl shadow-black/30">
+            <div className="aspect-video w-full">
+              <iframe
+                className="h-full w-full"
+                src="https://www.youtube.com/embed/VIKJXdkwVgA"
+                frameBorder="0"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title="Energy-vest Introduction"
+              />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* 🔹 Video Section */}
-      <div className="max-w-4xl mx-auto mt-12">
-        <div
-          className="relative w-full overflow-hidden rounded-lg shadow-lg"
-          style={{ paddingTop: "56.25%" }}
-        >
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/VIKJXdkwVgA"
-            frameBorder="0"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            title="Energy-vest Introduction"
-          />
+      {/* TESTIMONIALS */}
+      <section className="w-full px-4 py-8 sm:px-6 sm:py-20 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="mx-auto w-full max-w-[1600px]">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
+              Client Experience
+            </span>
+
+            <h3 className="mt-3 text-3xl font-extrabold text-gray-950 sm:text-4xl md:text-5xl">
+              What Our Clients Say
+            </h3>
+          </div>
+
+          <div className=" grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="flex flex-col items-start">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-50 text-orange-500">
+                  <Quote className="h-5 w-5" />
+                </div>
+
+                <p className="mt-5 text-base leading-7 text-gray-600">
+                  “{testimonial.text}”
+                </p>
+
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-950 text-sm font-bold text-white">
+                    {testimonial.name.charAt(0)}
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-gray-900">
+                      {testimonial.name}
+                    </h4>
+                    <p className="text-xs text-gray-500">Verified Client</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* 🔹 Testimonials Section */}
-      <div className="py-20">
-        <h3 className="text-3xl font-bold text-center text-gray-800">
-          What Our Clients Say
-        </h3>
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((t, i) => (
-            <div
-              key={i}
-              className="border rounded-lg shadow-md bg-white p-6 text-center hover:shadow-lg transition"
-            >
-              <p className="text-gray-600 italic">"{t.text}"</p>
-              <h4 className="mt-4 font-semibold text-gray-800">{t.name}</h4>
-            </div>
-          ))}
+      {/* CTA */}
+      <section className="w-full px-4 sm:px-6 sm:pb-20 md:px-10 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-3xl bg-orange-500 px-5 py-8 text-center sm:px-10 sm:py-16 md:px-16 md:py-20">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
+
+          <div className="relative mx-auto max-w-4xl">
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-white/80">
+              Start Your Journey
+            </span>
+
+            <h3 className="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+              Ready to Secure Your Financial Future?
+            </h3>
+
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/90 sm:text-lg md:text-xl">
+              Join thousands of investors and start growing your wealth today.
+            </p>
+
+            <button className="mt-8 inline-flex h-13 items-center justify-center gap-3 rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-orange-600 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-gray-950 hover:text-white sm:px-9 sm:text-base">
+              Get Started Now
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* 🔹 CTA Section */}
-      <div className="bg-orange-500 py-12 px-6 text-center rounded-2xl text-white">
-        <h3 className="text-3xl sm:text-4xl font-bold">
-          Ready to Secure Your Financial Future?
-        </h3>
-        <p className="mt-4 text-lg">
-          Join thousands of investors and start growing your wealth today.
-        </p>
-        <button className="mt-6 bg-white text-orange-600 px-8 py-3 rounded-lg shadow hover:shadow-lg font-semibold">
-          Get Started Now
-        </button>
-      </div>
-
-      {/* 🔹 Investment Plans Section */}
-      <Invest />
-    </div>
+      {/* INVESTMENT PLANS */}
+      <section className="w-full">
+        <Invest />
+      </section>
+    </main>
   );
 }
 

@@ -10,33 +10,33 @@ const plans = [
   {
     id: 1,
     title: "STAKING A",
-    min: "$25.00",
+    min: "$100.00",
     max: "$500.00",
-    profit: "1.5%",
-    duration: "Daily for 15 days",
-    referral: "20%",
+    profit: "4.5%",
+    duration: "Daily for just 24hours",
+    referral: "10%",
     category: "Crypto Currency Trading",
     link: "https://www.tradingview.com/",
   },
   {
     id: 2,
     title: "STAKING B",
-    min: "$501.00",
+    min: "$850.00",
     max: "$1,500.00",
-    profit: "2.0%",
-    duration: "Daily for 20 days",
-    referral: "25%",
+    profit: "5.0%",
+    duration: "Daily for just 24hours",
+    referral: "20%",
     category: "Crypto Currency Trading",
     link: "https://www.tradingview.com/",
   },
   {
     id: 3,
     title: "STAKING C",
-    min: "$1,501.00",
+    min: "$2,000.00",
     max: "$5,000.00",
-    profit: "2.5%",
-    duration: "Daily for 25 days",
-    referral: "30%",
+    profit: "6.5%",
+    duration: "Daily for just 24hours",
+    referral: "25%",
     category: "Crypto Currency Trading",
     link: "https://www.tradingview.com/",
   },
@@ -45,9 +45,9 @@ const plans = [
     title: "STAKING D",
     min: "$5,001.00",
     max: "$10,000.00",
-    profit: "3.0%",
-    duration: "Daily for 30 days",
-    referral: "35%",
+    profit: "10.0%",
+    duration: "Daily for 24hours",
+    referral: "30%",
     category: "Crypto Currency Trading",
     link: "https://www.tradingview.com/",
   },
@@ -160,7 +160,7 @@ function Invest() {
     gives you the confidence to invest, spend, and grow your wealth globally.
   </p>
   <p className="mt-4 font-semibold text-orange-600 text-base sm:text-lg md:text-xl">
-    💳 Invest smart. Spend freely. Trust Energy-Vest.
+     Invest smart. Spend freely. Trust Energy-Vest.
   </p>
 </div>
 <div className="mt-8 flex justify-center">

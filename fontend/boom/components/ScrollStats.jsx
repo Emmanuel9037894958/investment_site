@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
@@ -12,24 +13,44 @@ const stats = [
 ];
 
 export default function StatsSection() {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 });
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
 
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 mb-11">
-        <div ref={ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+    <section className="relative w-full overflow-hidden bg-white py-20 sm:py-28">
+      {/* Subtle modern background glow accent */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[800px] rounded-full bg-emerald-500/5 blur-[120px]" />
+
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
+        <div ref={ref} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {stats.map((stat) => (
-            <div key={stat.id} className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-orange-500">
-                {inView ? <CountUp end={stat.value} duration={2.5} /> : 0}
-                {stat.suffix}
-              </h2>
-              <p className="mt-2 text-gray-700 text-base sm:text-lg">{stat.label}</p>
+            <div 
+              key={stat.id} 
+              className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-slate-950 p-8 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-500/10"
+            >
+              <div className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+                {inView ? (
+                  <CountUp 
+                    end={stat.value} 
+                    duration={2.5} 
+                    decimals={stat.value % 1 !== 0 ? 1 : 0} 
+                  />
+                ) : (
+                  0
+                )}
+                <span className="text-emerald-400">{stat.suffix}</span>
+              </div>
+
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
       </div>
-      <SecuritySection />
+
+      <div className="mt-20">
+        <SecuritySection />
+      </div>
     </section>
   );
 }

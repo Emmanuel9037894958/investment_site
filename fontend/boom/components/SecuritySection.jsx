@@ -1,88 +1,74 @@
 "use client";
-import React from "react";
-import { Shield, Lock, Users, Award } from "lucide-react";
-import Link from "next/link";
 
+import React from "react";
+import { ShieldCheck, Lock, Server, CheckCircle2 } from "lucide-react";
+
+const securityFeatures = [
+  {
+    icon: ShieldCheck,
+    title: "Bank-Grade Encryption",
+    description: "All personal data and transactional communications are secured using advanced TLS/SSL protocols.",
+  },
+  {
+    icon: Lock,
+    title: "Asset Safeguarding",
+    description: "Client portfolios and funds are managed through highly secure, multi-layer authorization controls.",
+  },
+  {
+    icon: Server,
+    title: "Protected Infrastructure",
+    description: "Our platform operates on robust, redundant cloud systems with continuous security monitoring.",
+  },
+];
 
 export default function SecuritySection() {
-  const securityItems = [
-    {
-      id: 1,
-      icon: (
-        <Shield className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" />
-      ),
-      title: "Regulated Activities",
-      description: "FSO license No. 1426969",
-    },
-    {
-      id: 2,
-      icon: (
-        <Lock className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" />
-      ),
-      title: "Negative Balance Protection",
-      description: "Your funds are fully secure",
-    },
-    {
-      id: 3,
-      icon: (
-        <Users className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" />
-      ),
-      title: "Financial Commission Participant",
-      description: "Trusted by global standards",
-    },
-    {
-      id: 4,
-      icon: (
-        <Award className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white" />
-      ),
-      title: "Execution Quality Certificate",
-      description: "Verified by Verify My Trade",
-    },
-  ];
-
   return (
-    <section className="bg-orange-500 py-16 px-6 sm:px-10 lg:px-20">
-      <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-          Security of Client's Funds
-        </h2>
-        <p className="text-white text-sm sm:text-base md:text-lg mb-12">
-          Your funds are fully secured when you invest with{" "}
-          <span className="font-semibold">wealth-catalyst.xyz</span>.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {securityItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col items-center text-center"
-            >
-              <div className="mb-4">{item.icon}</div>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm sm:text-base md:text-lg text-white">
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-12 flex flex-col sm:flex-row justify-center gap-6">
-          <Link href="/login">
-            <button className="bg-white text-orange-500 font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-full shadow-lg shadow-orange-700/50 hover:shadow-2xl transition-all">
-              Login
-            </button>
-          </Link>
+    <section className="relative w-full overflow-hidden bg-[#0b1426] py-8 text-white sm:py-28">
+      {/* Background ambient lighting effects */}
+      <div className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-emerald-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-indigo-500/10 blur-[120px]" />
 
-          <Link href="/signup">
-            <button className="bg-white text-orange-500 font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-full shadow-lg shadow-orange-700/50 hover:shadow-2xl transition-all">
-              Create Account
-            </button>
-          </Link>
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            <CheckCircle2 size={15} />
+            Enterprise Protection
+          </div>
+
+          <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
+            Your Security Is Our <span className="text-emerald-400">Top Priority</span>
+          </h2>
+
+          <p className="mt-4 text-base leading-7 text-slate-300 sm:text-lg">
+            We employ rigorous security standards and protocols to ensure your account, 
+            investments, and privacy remain fully protected at all times.
+          </p>
         </div>
-      </div>
-      <div>
-       
+
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+          {securityFeatures.map((item, index) => {
+            const Icon = item.icon;
+
+            return (
+              <div
+                key={index}
+                className="group relative flex flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/40 hover:bg-white/[0.07] hover:shadow-2xl hover:shadow-emerald-500/10"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 transition-transform duration-300 group-hover:scale-110">
+                  <Icon size={26} />
+                </div>
+
+                <h3 className="mt-6 text-xl font-bold text-white">
+                  {item.title}
+                </h3>
+
+                <p className="mt-3 text-sm leading-6 text-slate-400">
+                  {item.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

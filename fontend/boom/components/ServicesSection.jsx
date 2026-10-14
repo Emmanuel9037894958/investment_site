@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import FaqPreview from "./FaqPreview";
+import { ArrowRight } from "lucide-react";
 
 export default function ServicesSection() {
   const services = [
@@ -82,53 +83,60 @@ export default function ServicesSection() {
   return (
     <section
       id="learn-more"
-      className="px-6 sm:px-10 lg:px-20 bg-gray-100 py-16"
+      className="w-full bg-[#f7f8fa] py-20 px-6 sm:px-10 lg:px-20 text-gray-900"
     >
-      <div className="max-w-7xl mx-auto text-center mb-12">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">
+      <div className="mx-auto max-w-7xl text-center mb-16">
+        <span className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500">
+          Global Opportunities
+        </span>
+        <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-gray-950">
           Our Services
         </h2>
-        <p className="mt-4 text-gray-600 text-sm sm:text-base md:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-base text-gray-600 sm:text-lg">
           Explore a wide range of investment opportunities tailored for your
-          financial growth.
+          financial growth and long-term security.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-7xl grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((service) => (
           <div
             key={service.id}
-            className="flex flex-col items-center text-center"
+            className="group flex flex-col items-start text-left"
           >
-            {/* 🔹 Service Image */}
-            <div className="w-full h-40 rounded-xl mb-4 overflow-hidden">
+            {/* Service Image with smooth hover effect */}
+            <div className="w-full h-56 rounded-2xl mb-5 overflow-hidden shadow-sm bg-gray-200">
               <img
                 src={service.image}
                 alt={service.title}
-                className="w-full h-full object-cover rounded-xl"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
 
-            {/* 🔹 Service Title */}
-            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-2">
+            {/* Service Title */}
+            <h3 className="text-xl font-bold text-gray-950 mb-2">
               {service.title}
             </h3>
 
-            {/* 🔹 Service Description */}
-            <p className="text-gray-600 text-sm sm:text-base md:text-base mb-4">
+            {/* Service Description */}
+            <p className="text-gray-600 text-sm leading-6 mb-5 flex-1">
               {service.description}
             </p>
 
-            {/* 🔹 Learn More Button */}
+            {/* Learn More Action Link */}
             <Link href={service.link}>
-              <button className="bg-orange-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-orange-600 transition-all">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 transition-colors group-hover:text-orange-600">
                 Learn More
-              </button>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
             </Link>
           </div>
         ))}
       </div>
-      <FaqPreview />
+
+      <div className="mt-24">
+        <FaqPreview />
+      </div>
     </section>
   );
 }

@@ -17,22 +17,28 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900 relative">
+      <body className="bg-gray-50 text-gray-900 relative min-h-screen w-full overflow-x-hidden">
         <UserProvider>
           <ClientProvider>
             <AlertNotification />
 
-            <header className="w-full flex items-center justify-center sm:justify-start bg-white shadow-md px-6 py-4">
-              <BarChart className="w-8 h-8 text-orange-500 mr-2" />
-
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Energy-Vest
-              </h1>
+            {/* Full-width Header */}
+            <header className="w-full flex items-center justify-between bg-white shadow-md px-4 sm:px-8">
+              <div className="flex items-center">
+                <BarChart className="w-8 h-8 text-orange-500 mr-2" />
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Energy-Vest
+                </h1>
+              </div>
             </header>
 
-            <Navbar />
+            {/* Navbar */}
+            <div className="w-full">
+              <Navbar />
+            </div>
 
-            <main className="pt-6 px-4 sm:px-6 lg:px-8">
+            {/* Full-width Main Content Area */}
+            <main className="w-full pt-6 px-4 sm:px-8 lg:px-12">
               {children}
             </main>
           </ClientProvider>

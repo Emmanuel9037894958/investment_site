@@ -1,102 +1,204 @@
+
 "use client";
+
 import { useEffect, useState } from "react";
+import {
+  Activity,
+  ArrowDownLeft,
+  ArrowUpRight,
+  UserRound,
+  X,
+  ShieldCheck,
+} from "lucide-react";
+
+const sampleActivities = [
+  {
+    name: "James",
+    country: "United States",
+    flag: "🇺🇸",
+    action: "opened an account",
+    detail: "Welcome to EnergyVest",
+    type: "account",
+  },
+  {
+    name: "Sophia",
+    country: "Nigeria",
+    flag: "🇳🇬",
+    action: "viewed an investment plan",
+    detail: "Investment plans",
+    type: "activity",
+  },
+  {
+    name: "Michael",
+    country: "United Kingdom",
+    flag: "🇬🇧",
+    action: "visited the funding page",
+    detail: "Account funding",
+    type: "activity",
+  },
+  {
+    name: "Emma",
+    country: "Canada",
+    flag: "🇨🇦",
+    action: "reviewed account activity",
+    detail: "Account overview",
+    type: "activity",
+  },
+  {
+    name: "William",
+    country: "Germany",
+    flag: "🇩🇪",
+    action: "explored the platform",
+    detail: "EnergyVest",
+    type: "activity",
+  },
+  {
+    name: "Olivia",
+    country: "Australia",
+    flag: "🇦🇺",
+    action: "visited the investment dashboard",
+    detail: "Dashboard",
+    type: "activity",
+  },
+  {
+    name: "Benjamin",
+    country: "South Africa",
+    flag: "🇿🇦",
+    action: "reviewed the available features",
+    detail: "Platform features",
+    type: "activity",
+  },
+  {
+    name: "Ava",
+    country: "France",
+    flag: "🇫🇷",
+    action: "visited the account page",
+    detail: "Account information",
+    type: "activity",
+  },
+];
 
 export default function AlertNotification() {
-  const names = [
-    "James", "Sophia", "Michael", "Emma", "William", "Olivia",
-    "Benjamin", "Ava", "Lucas", "Isabella", "Ethan", "Mia",
-    "Alexander", "Charlotte", "Daniel", "Amelia", "Henry",
-    "Harper", "Matthew", "Evelyn",
-  ];
-
-  const actions = [
-    "just deposited $5,000!",
-    "withdrew $1,200!",
-    "started trading with $3,500!",
-    "invested $7,800!",
-    "made a profit of $900!",
-    "joined with $4,000!",
-    "is trading with $10,000!",
-    "just opened an account!",
-    "made a withdrawal of $5,300!",
-    "is making big moves!",
-  ];
-
-  const countryAlerts = [
-    "Someone from USA just deposited $5,000!",
-    "A user from Nigeria withdrew $1,200!",
-    "Investor from Canada started trading with $3,500!",
-    "Someone from Germany invested $7,800!",
-    "Trader from UK made a profit of $900!",
-  ];
-
-  const [message, setMessage] = useState("");
-  const [position, setPosition] = useState("middle");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const randomMsg = () => {
-      if (Math.random() > 0.5) {
-        const n = names[Math.floor(Math.random() * names.length)];
-        const a = actions[Math.floor(Math.random() * actions.length)];
-        return `🔥 ${n} ${a}`;
-      }
-      return countryAlerts[Math.floor(Math.random() * countryAlerts.length)];
-    };
+    if (dismissed) return;
 
-    const showNotification = () => {
-      setMessage(randomMsg());
-      setPosition((prev) => (prev === "middle" ? "bottom" : "middle"));
-    };
+    const interval = setInterval(() => {
+      setVisible(false);
 
-    showNotification();
-    const interval = setInterval(showNotification, 4000);
+      const timeout = setTimeout(() => {
+        setCurrentIndex((previous) => {
+          let next = Math.floor(
+            Math.random() * sampleActivities.length
+          );
+
+          if (sampleActivities.length > 1) {
+            while (next === previous) {
+              next = Math.floor(
+                Math.random() * sampleActivities.length
+              );
+            }
+          }
+
+          return next;
+        });
+
+        setVisible(true);
+      }, 350);
+
+      return () => clearTimeout(timeout);
+    }, 6500);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [dismissed]);
+
+  if (dismissed) return null;
+
+  const activity = sampleActivities[currentIndex];
+
+  const ActivityIcon =
+    activity.type === "account" ? UserRound : Activity;
 
   return (
-    <>
-      {/* 🔥 Notification */}
-      <div
-        className={`fixed z-[9999] px-5 py-3 rounded-lg 
-        text-orange-600 font-bold bg-white text-sm sm:text-base md:text-lg 
-        shadow-lg transition-all duration-500 ease-in-out
-        ${
-          position === "middle"
-            ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-slide-down"
-            : "bottom-8 left-1/2 -translate-x-1/2 animate-slide-up"
-        }`}
-      >
-        {message}
-      </div>
+    <div
+      className={`fixed bottom-4 left-3 right-3 z-[9999] sm:bottom-6 sm:left-6 sm:right-auto sm:w-[360px] ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "translate-y-3 opacity-0"
+      } transition-all duration-300 ease-out`}
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-950/15">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+              <Activity size={17} />
+            </div>
 
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            transform: translate(-50%, -150%);
-            opacity: 0;
-          }
-          to {
-            transform: translate(-50%, -50%);
-            opacity: 1;
-          }
-        }
-        @keyframes slideUp {
-          from {
-            transform: translate(-50%, 150%);
-            opacity: 0;
-          }
-          to {
-            transform: translate(-50%, 0%);
-            opacity: 1;
-          }
-        }
-        .animate-slide-down {
-          animation: slideDown 0.5s ease-out;
-        }
-        .animate-slide-up {
-          animation: slideUp 0.5s ease-out;
-        }
-      `}</style>
-    </>
+            <div>
+              <p className="text-xs font-bold text-slate-900">
+                EnergyVest activity
+              </p>
+              <p className="text-[10px] text-slate-500">
+                Sample notification
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            aria-label="Dismiss activity notification"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="flex gap-3 p-4">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-blue-50 text-indigo-700">
+            <ActivityIcon size={22} />
+
+            <span className="absolute -bottom-1 -right-1 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-white text-base shadow-sm">
+              {activity.flag}
+            </span>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-sm font-bold text-slate-900">
+                {activity.name}
+              </p>
+
+              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
+                Sample
+              </span>
+            </div>
+
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              {activity.action}
+            </p>
+
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+              <span>{activity.flag}</span>
+              <span>{activity.country}</span>
+              <span className="text-slate-300">•</span>
+              <span>{activity.detail}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-2.5">
+          <ShieldCheck size={14} className="shrink-0 text-emerald-600" />
+          <p className="text-[10px] leading-4 text-slate-500">
+            Illustrative activity only. Not a verified live transaction.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

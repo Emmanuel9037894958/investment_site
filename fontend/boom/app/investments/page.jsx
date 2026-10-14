@@ -2,19 +2,50 @@
 
 import { useState } from "react";
 import {
-  X,
-  Wallet,
+  ArrowRight,
+  ArrowUpRight,
+  Bitcoin,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  CircleDollarSign,
+  Copy,
+  CreditCard,
+  ExternalLink,
   Loader2,
   ShieldCheck,
-  Bitcoin,
+  Wallet,
+  X,
+  Zap,
   AlertCircle,
-  ExternalLink,
-  Copy,
-  Check,
 } from "lucide-react";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+
+const PLANS = [
+  {
+    value: "starter",
+    name: "Starter",
+    description: "For exploring the platform",
+    icon: Wallet,
+    features: ["Account access", "Investment tracking"],
+  },
+  {
+    value: "pro",
+    name: "Pro",
+    description: "For experienced users",
+    icon: Zap,
+    features: ["Portfolio overview", "Transaction history"],
+  },
+  {
+    value: "vip",
+    name: "VIP",
+    description: "For users seeking additional services",
+    icon: ShieldCheck,
+    features: ["Account overview", "Priority support access"],
+  },
+];
 
 const CRYPTO_OPTIONS = [
   { value: "btc", label: "Bitcoin (BTC)" },
@@ -24,31 +55,40 @@ const CRYPTO_OPTIONS = [
   { value: "trx", label: "TRON (TRX)" },
 ];
 
+const formatUSD = (value) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value) || 0);
+
 export default function InvestmentsPage() {
   const [form, setForm] = useState({
     plan: "",
     amount: "",
   });
-  const [modalOpen, setModalOpen] = useState(false);
 
-  const handleChange = (e) => {
-    setForm((previous) => ({
-      ...previous,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const [modalOpen, setModalOpen] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const selectedPlan = PLANS.find(
+    (item) => item.value === form.plan
+  );
 
   const handleOpenModal = (e) => {
     e.preventDefault();
+    setFormError("");
+
     const amount = Number(form.amount);
 
     if (!form.plan) {
-      alert("Please select an investment plan.");
+      setFormError("Please choose an investment plan.");
       return;
     }
 
-    if (!amount || amount <= 0) {
-      alert("Please enter a valid investment amount.");
+    if (!Number.isFinite(amount) || amount < 1) {
+      setFormError("Enter an amount of at least $1.");
       return;
     }
 
@@ -56,95 +96,321 @@ export default function InvestmentsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl space-y-8">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
-            <Wallet size={24} />
-          </div>
-          <h1 className="mt-4 text-3xl font-bold text-slate-900">
-            Create Investment
-          </h1>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-            Select an investment plan and amount. Payment is processed through
-            the secure Energy-Vest payment system.
-          </p>
-        </div>
-
-        <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
-          <form onSubmit={handleOpenModal} className="space-y-5">
-            <div>
-              <label
-                htmlFor="plan"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Investment Plan
-              </label>
-
-              <select
-                id="plan"
-                name="plan"
-                value={form.plan}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-                required
-              >
-                <option value="">Select Plan</option>
-                <option value="starter">Starter Plan</option>
-                <option value="pro">Pro Plan</option>
-                <option value="vip">VIP Plan</option>
-              </select>
+    <main className="min-h-screen bg-[#f5f6f8] text-slate-900">
+      {/* Header */}
+      <header className="border-b border-white/10 bg-[#101b30]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d9ad5b] text-[#101b30]">
+              <CircleDollarSign size={25} />
             </div>
 
             <div>
+              <p className="text-lg font-extrabold tracking-tight text-white">
+                Energy<span className="text-[#d9ad5b]">-</span>Vest
+              </p>
+
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">
+                Investment platform
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-2 text-sm text-slate-300 sm:flex">
+            <Wallet size={17} className="text-[#d9ad5b]" />
+            Investment center
+          </div>
+        </div>
+      </header>
+
+      {/* Intro */}
+      <section className="bg-[#101b30]">
+        <div className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#d9ad5b]">
+              Investment services
+            </p>
+
+            <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Choose your plan.
+              <span className="mt-1 block text-[#d9ad5b]">
+                Set your amount.
+              </span>
+            </h1>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              Select a plan, enter the amount you wish to pay, and choose
+              your preferred payment method to continue.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Main content */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <form onSubmit={handleOpenModal}>
+          {/* Plans */}
+          <div>
+            <div className="mb-5">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                Select an investment plan
+              </h2>
+
+              <p className="mt-1.5 text-sm text-slate-500">
+                Choose the plan you want to continue with.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {PLANS.map((plan) => {
+                const Icon = plan.icon;
+                const active = form.plan === plan.value;
+
+                return (
+                  <button
+                    key={plan.value}
+                    type="button"
+                    onClick={() => {
+                      setForm((previous) => ({
+                        ...previous,
+                        plan: plan.value,
+                      }));
+
+                      setFormError("");
+                    }}
+                    aria-pressed={active}
+                    className={`relative flex min-w-0 flex-col rounded-2xl border bg-white p-5 text-left transition sm:p-6 ${
+                      active
+                        ? "border-emerald-600 ring-2 ring-emerald-100 shadow-md"
+                        : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                          active
+                            ? "bg-emerald-700 text-white"
+                            : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        <Icon size={23} />
+                      </div>
+
+                      <span
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
+                          active
+                            ? "border-emerald-700 bg-emerald-700 text-white"
+                            : "border-slate-300 text-transparent"
+                        }`}
+                      >
+                        <Check size={14} />
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 text-xl font-bold text-slate-900">
+                      {plan.name}
+                    </h3>
+
+                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                      {plan.description}
+                    </p>
+
+                    <div className="my-5 h-px bg-slate-100" />
+
+                    <ul className="space-y-3">
+                      {plan.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-center gap-2.5 text-sm text-slate-600"
+                        >
+                          <CheckCircle2
+                            size={16}
+                            className="shrink-0 text-emerald-600"
+                          />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-6 flex items-center justify-between">
+                      <span
+                        className={`text-sm font-semibold ${
+                          active
+                            ? "text-emerald-700"
+                            : "text-slate-500"
+                        }`}
+                      >
+                        {active ? "Selected" : "Choose plan"}
+                      </span>
+
+                      <ChevronRight
+                        size={18}
+                        className={
+                          active
+                            ? "text-emerald-700"
+                            : "text-slate-400"
+                        }
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Amount and summary */}
+          <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_360px] lg:gap-8">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                  <CircleDollarSign size={23} />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Investment amount
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Enter the amount in US dollars.
+                  </p>
+                </div>
+              </div>
+
               <label
-                htmlFor="amount"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                htmlFor="investment-amount"
+                className="mb-2 mt-7 block text-sm font-semibold text-slate-700"
               >
-                Investment Amount
+                Amount to pay
               </label>
 
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-semibold text-slate-400">
                   $
                 </span>
 
                 <input
-                  id="amount"
+                  id="investment-amount"
                   type="number"
                   name="amount"
                   min="1"
+                  max="1000000"
                   step="0.01"
+                  inputMode="decimal"
                   placeholder="Enter amount"
                   value={form.amount}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-8 pr-4 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                  onChange={(e) => {
+                    setForm((previous) => ({
+                      ...previous,
+                      amount: e.target.value,
+                    }));
+
+                    setFormError("");
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white py-4 pl-10 pr-4 text-xl font-bold text-slate-900 outline-none transition placeholder:text-base placeholder:font-normal placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100"
                   required
                 />
               </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {[25, 50, 100, 250, 500].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setForm((previous) => ({
+                        ...previous,
+                        amount: String(value),
+                      }));
+
+                      setFormError("");
+                    }}
+                    className={`rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${
+                      Number(form.amount) === value
+                        ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/50"
+                    }`}
+                  >
+                    ${value}
+                  </button>
+                ))}
+              </div>
+
+              {formError && (
+                <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700">
+                  <AlertCircle size={17} className="mt-0.5 shrink-0" />
+                  <p>{formError}</p>
+                </div>
+              )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-indigo-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 active:scale-[0.99]"
-            >
-              Proceed to Payment
-            </button>
-          </form>
+            {/* Order summary */}
+            <aside className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-slate-900">
+                Order summary
+              </h2>
 
-          <div className="mt-6 flex items-start gap-3 rounded-xl bg-slate-50 p-4">
-            <ShieldCheck
-              size={19}
-              className="mt-0.5 shrink-0 text-emerald-600"
-            />
+              <p className="mt-1 text-sm text-slate-500">
+                Review your selection before checkout.
+              </p>
 
-            <p className="text-xs leading-5 text-slate-500">
-              Payments are verified by the payment provider and Energy-Vest
-              backend before funds are credited to your account.
-            </p>
+              <div className="my-5 h-px bg-slate-100" />
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500">Plan</span>
+                  <span className="font-semibold text-slate-900">
+                    {selectedPlan?.name || "Not selected"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500">Amount</span>
+                  <span className="font-semibold text-slate-900">
+                    {formatUSD(form.amount)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500">Payment fees</span>
+                  <span className="text-right text-xs text-slate-500">
+                    Confirm at checkout
+                  </span>
+                </div>
+              </div>
+
+              <div className="my-5 h-px bg-slate-100" />
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-slate-700">
+                  Total before fees
+                </span>
+
+                <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                  {formatUSD(form.amount)}
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+              >
+                Continue to payment
+                <ArrowRight size={18} />
+              </button>
+
+              <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+                You can review your payment method before continuing.
+              </p>
+            </aside>
           </div>
-        </div>
-      </div>
+        </form>
+
+        <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-6 text-slate-500">
+          Review the applicable investment terms, fees, and risks before
+          making a payment. Investment returns are not guaranteed.
+        </p>
+      </section>
 
       {modalOpen && (
         <PaymentModal
@@ -161,81 +427,133 @@ function PaymentModal({ plan, amount, onClose }) {
   const [method, setMethod] = useState("crypto");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
-        >
-          <X size={20} />
-        </button>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-[#07101f]/65 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="payment-modal-title"
+        className="my-auto max-h-[95svh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl"
+      >
+        <div className="bg-[#101b30] px-5 py-5 text-white sm:px-7 sm:py-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#e4bd73]">
+                Energy-Vest checkout
+              </p>
 
-        <div className="rounded-t-3xl bg-slate-900 px-6 py-7 text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-            Investment Payment
-          </p>
+              <h2
+                id="payment-modal-title"
+                className="mt-2 text-2xl font-bold tracking-tight"
+              >
+                Choose payment method
+              </h2>
 
-          <h2 className="mt-2 text-2xl font-bold">Complete Your Payment</h2>
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/10 p-3">
-              <p className="text-xs text-slate-400">Plan</p>
-              <p className="mt-1 font-semibold capitalize">{plan}</p>
+              <p className="mt-2 text-sm text-slate-300">
+                Select how you would like to pay.
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-white/10 p-3">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close payment window"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-slate-300 transition hover:bg-white/10 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+            <div>
+              <p className="text-xs text-slate-400">Selected plan</p>
+              <p className="mt-1 font-semibold capitalize text-white">
+                {plan}
+              </p>
+            </div>
+
+            <div className="text-right">
               <p className="text-xs text-slate-400">Amount</p>
-              <p className="mt-1 font-semibold">
-                ${Number(amount).toFixed(2)}
+              <p className="mt-1 text-xl font-bold text-[#e4bd73]">
+                {formatUSD(amount)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="mb-5 grid grid-cols-2 gap-3">
-            <button
-              type="button"
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-2 gap-3">
+            <PaymentMethodButton
+              active={method === "crypto"}
               onClick={() => setMethod("crypto")}
-              className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                method === "crypto"
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              Crypto
-            </button>
+              icon={Bitcoin}
+              title="Cryptocurrency"
+              subtitle="Pay with crypto"
+            />
 
-            <button
-              type="button"
+            <PaymentMethodButton
+              active={method === "flutterwave"}
               onClick={() => setMethod("flutterwave")}
-              className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                method === "flutterwave"
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              Card / Bank
-            </button>
+              icon={CreditCard}
+              title="Card / Bank Transfer"
+              subtitle="Pay by card or bank"
+            />
           </div>
 
-          {method === "crypto" ? (
-            <NowPaymentsPay
-              amount={amount}
-              plan={plan}
-              onClose={onClose}
-            />
-          ) : (
-            <FlutterwavePay
-              amount={amount}
-              plan={plan}
-              onClose={onClose}
-            />
-          )}
+          <div className="mt-5">
+            {method === "crypto" ? (
+              <NowPaymentsPay
+                amount={amount}
+                plan={plan}
+                onClose={onClose}
+              />
+            ) : (
+              <FlutterwavePay
+                amount={amount}
+                plan={plan}
+                onClose={onClose}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function PaymentMethodButton({
+  active,
+  onClick,
+  icon: Icon,
+  title,
+  subtitle,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`min-w-0 rounded-xl border p-3.5 text-left transition sm:p-4 ${
+        active
+          ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-100"
+          : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <Icon size={22} />
+
+        {active && (
+          <CheckCircle2 size={17} className="text-emerald-600" />
+        )}
+      </div>
+
+      <p className="mt-3 text-sm font-bold">{title}</p>
+      <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+    </button>
   );
 }
 
@@ -248,18 +566,18 @@ function NowPaymentsPay({ amount, plan, onClose }) {
 
   const createPayment = async () => {
     setError("");
-    setPayment(null);
+
     const numericAmount = Number(amount);
 
-    if (!numericAmount || numericAmount <= 0) {
-      setError("Please enter a valid investment amount.");
+    if (!Number.isFinite(numericAmount) || numericAmount < 1) {
+      setError("Please enter a valid payment amount.");
       return;
     }
 
     const token = localStorage.getItem("token");
 
     if (!token) {
-      setError("Your session has expired. Please log in again.");
+      setError("Please log in again to continue.");
       return;
     }
 
@@ -283,29 +601,30 @@ function NowPaymentsPay({ amount, plan, onClose }) {
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || "Unable to create the NOWPayments payment."
+          data.message || "Unable to create the payment. Please try again."
         );
       }
 
-      const deposit = data.deposit;
-
-      if (!deposit) {
+      if (!data.deposit) {
         throw new Error(
-          "The server did not return valid payment information."
+          "Payment details were not returned by the server."
         );
       }
 
-      setPayment(deposit);
+      setPayment(data.deposit);
 
-      if (deposit.payment_url) {
-        window.open(deposit.payment_url, "_blank", "noopener,noreferrer");
+      if (data.deposit.payment_url) {
+        window.open(
+          data.deposit.payment_url,
+          "_blank",
+          "noopener,noreferrer"
+        );
       }
     } catch (err) {
-      console.error("NOWPayments error:", err);
+      console.error("Crypto payment error:", err);
 
       setError(
-        err?.message ||
-          "Unable to create the NOWPayments payment. Please try again."
+        err?.message || "Unable to create the payment. Please try again."
       );
     } finally {
       setLoading(false);
@@ -314,178 +633,146 @@ function NowPaymentsPay({ amount, plan, onClose }) {
 
   const copyAddress = async () => {
     if (!payment?.payment_address) return;
+
     try {
       await navigator.clipboard.writeText(payment.payment_address);
       setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Copy error:", error);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (err) {
+      console.error("Copy payment address error:", err);
+      setError("Could not copy the address. Please copy it manually.");
     }
   };
 
   return (
     <div className="space-y-4">
-      <div>
-        <label
-          htmlFor="crypto"
-          className="mb-2 block text-xs font-semibold text-slate-700"
-        >
-          Cryptocurrency
-        </label>
-        <select
-          id="crypto"
-          value={crypto}
-          onChange={(e) => setCrypto(e.target.value)}
-          disabled={loading}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 disabled:opacity-60"
-        >
-          {CRYPTO_OPTIONS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!payment && (
+        <div>
+          <label
+            htmlFor="crypto"
+            className="mb-2 block text-sm font-semibold text-slate-700"
+          >
+            Cryptocurrency and network
+          </label>
 
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-600" />
-            <p className="text-sm leading-5 text-red-700">{error}</p>
-          </div>
+          <select
+            id="crypto"
+            value={crypto}
+            onChange={(e) => setCrypto(e.target.value)}
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-800 outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100 disabled:opacity-60"
+          >
+            {CRYPTO_OPTIONS.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
+      {error && <ErrorNotice message={error} />}
+
       {payment && (
-        <div className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <div className="flex items-start gap-3">
-            <Bitcoin size={21} className="mt-0.5 shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-semibold text-emerald-900">
-                Payment Created
-              </p>
-              <p className="mt-1 text-xs leading-5 text-emerald-700">
-                Your payment has been created. Complete the payment using the
-                instructions below.
-              </p>
-            </div>
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div>
+            <p className="text-sm font-bold text-slate-900">
+              Payment instructions
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Follow the payment details provided for this transaction.
+            </p>
           </div>
 
           {payment.crypto_amount && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                Amount to Pay
-              </p>
-              <p className="mt-1 break-all text-lg font-bold text-emerald-950">
-                {payment.crypto_amount} {payment.crypto_currency}
+            <div className="rounded-xl border border-slate-200 bg-white p-3.5">
+              <p className="text-xs text-slate-500">Amount to send</p>
+
+              <p className="mt-1 break-all text-lg font-bold text-slate-900">
+                {payment.crypto_amount} {payment.crypto_currency || ""}
               </p>
             </div>
           )}
 
           {payment.payment_address && (
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                Payment Address
-              </p>
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white p-3">
-                <p className="min-w-0 flex-1 break-all text-xs text-slate-700">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Payment address
+              </label>
+
+              <div className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white p-3">
+                <p className="min-w-0 flex-1 break-all text-xs leading-5 text-slate-700">
                   {payment.payment_address}
                 </p>
+
                 <button
                   type="button"
                   onClick={copyAddress}
-                  className="shrink-0 rounded-lg bg-slate-100 p-2 text-slate-700 transition hover:bg-slate-200"
-                  title="Copy payment address"
+                  aria-label="Copy payment address"
+                  className="shrink-0 rounded-lg border border-slate-200 p-2.5 text-slate-700 transition hover:bg-slate-100"
                 >
                   {copied ? (
-                    <Check size={16} className="text-emerald-600" />
+                    <Check size={17} className="text-emerald-600" />
                   ) : (
-                    <Copy size={16} />
+                    <Copy size={17} />
                   )}
                 </button>
               </div>
+
+              {copied && (
+                <p className="mt-1.5 text-xs text-emerald-700">
+                  Address copied.
+                </p>
+              )}
             </div>
           )}
 
           {payment.payment_url && (
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  payment.payment_url,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+            <a
+              href={payment.payment_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
             >
-              <ExternalLink size={18} />
-              Open NOWPayments
-            </button>
+              Open payment instructions
+              <ExternalLink size={17} />
+            </a>
           )}
 
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-            <p className="text-xs leading-5 text-amber-800">
-              Your Energy-Vest balance will only be credited after the payment
-              provider confirms the payment and the Energy-Vest backend verifies
-              it.
-            </p>
-          </div>
+          <p className="text-xs leading-5 text-slate-500">
+            Make sure the amount, asset, and network match the instructions
+            before sending funds.
+          </p>
         </div>
       )}
 
       {!payment && (
-        <>
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="flex items-start gap-3">
-              <Bitcoin size={21} className="mt-0.5 shrink-0 text-amber-500" />
-              <div>
-                <p className="text-sm font-semibold text-emerald-900">
-                  Pay securely with NOWPayments
-                </p>
-                <p className="mt-1 text-xs leading-5 text-emerald-700">
-                  A real payment will be created through the Energy-Vest backend
-                  using the cryptocurrency you select.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-600" />
-              <p className="text-xs leading-5 text-amber-800">
-                Opening or creating a payment does not automatically credit
-                your account. Funds are credited only after NOWPayments confirms
-                the payment.
-              </p>
-            </div>
-          </div>
-        </>
+        <p className="text-sm leading-6 text-slate-500">
+          Continue to request payment details for your selected cryptocurrency.
+        </p>
       )}
 
       <button
         type="button"
         onClick={createPayment}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>
             <Loader2 size={18} className="animate-spin" />
-            Creating Secure Payment...
+            Creating payment...
           </>
         ) : payment ? (
           <>
-            <ExternalLink size={18} />
-            Create Another Payment
+            <ArrowUpRight size={18} />
+            Create another payment
           </>
         ) : (
           <>
-            <ExternalLink size={18} />
-            Pay with NOWPayments
+            Continue securely
+            <ArrowRight size={18} />
           </>
         )}
       </button>
@@ -494,9 +781,9 @@ function NowPaymentsPay({ amount, plan, onClose }) {
         type="button"
         onClick={onClose}
         disabled={loading}
-        className="w-full rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-60"
+        className="w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
       >
-        Cancel
+        Close
       </button>
     </div>
   );
@@ -504,44 +791,80 @@ function NowPaymentsPay({ amount, plan, onClose }) {
 
 function FlutterwavePay({ amount, plan, onClose }) {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleFlutterwavePay = async () => {
-    setLoading(true);
-    setMessage("");
+  const [customer, setCustomer] = useState({
+    name: "",
+    email: "",
+  });
+
+  const [checkoutOpened, setCheckoutOpened] = useState(false);
+
+  const loadFlutterwave = async () => {
+    if (window.FlutterwaveCheckout) return;
+
+    const scriptUrl = "https://checkout.flutterwave.com/v3.js";
+    let script = document.querySelector(`script[src="${scriptUrl}"]`);
+
+    if (script) {
+      await new Promise((resolve, reject) => {
+        if (window.FlutterwaveCheckout) {
+          resolve();
+          return;
+        }
+
+        script.addEventListener("load", resolve, { once: true });
+
+        script.addEventListener(
+          "error",
+          () => reject(new Error("Unable to load checkout.")),
+          { once: true }
+        );
+      });
+
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      script = document.createElement("script");
+      script.src = scriptUrl;
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = () =>
+        reject(new Error("Unable to load checkout."));
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleFlutterwavePay = async (e) => {
+    e.preventDefault();
+    setError("");
+    setCheckoutOpened(false);
+
+    const publicKey = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError("Please log in again to continue.");
+      return;
+    }
+
+    if (!publicKey) {
+      setError("Card and bank payments are not configured yet.");
+      return;
+    }
+
+    if (
+      !customer.name.trim() ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)
+    ) {
+      setError("Enter your full name and a valid email address.");
+      return;
+    }
 
     try {
-      const publicKey = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
-
-      if (!publicKey) {
-        throw new Error("Flutterwave public key is not configured.");
-      }
-
-      if (!window.FlutterwaveCheckout) {
-        await new Promise((resolve, reject) => {
-          const existingScript = document.querySelector(
-            'script[src="https://checkout.flutterwave.com/v3.js"]'
-          );
-
-          if (existingScript) {
-            existingScript.addEventListener("load", resolve);
-            existingScript.addEventListener("error", reject);
-            return;
-          }
-
-          const script = document.createElement("script");
-          script.src = "https://checkout.flutterwave.com/v3.js";
-          script.onload = resolve;
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
-      }
-
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Your session has expired. Please log in again.");
-      }
+      setLoading(true);
+      await loadFlutterwave();
 
       const txRef = `EV-${Date.now()}-${Math.random()
         .toString(36)
@@ -555,79 +878,138 @@ function FlutterwavePay({ amount, plan, onClose }) {
         currency: "USD",
         payment_options: "card,banktransfer",
         customer: {
-          email: "customer-email-from-account",
-          name: "Energy-Vest Customer",
+          email: customer.email.trim(),
+          name: customer.name.trim(),
         },
         customizations: {
           title: "Energy-Vest",
           description: `Investment payment - ${plan}`,
           logo: "/logo.png",
         },
-        callback: function (response) {
-          console.log("Flutterwave response received:", response);
-          setMessage(
-            "Payment response received. Server verification is required before your account can be credited."
+        callback: function () {
+          setCheckoutOpened(false);
+          setError(
+            "Checkout has returned. Payment confirmation is pending verification."
           );
         },
         onclose: function () {
           setLoading(false);
+          setCheckoutOpened(false);
         },
       });
-    } catch (error) {
-      console.error("Flutterwave checkout error:", error);
-      setMessage(
-        error?.message || "Unable to open Flutterwave checkout."
+
+      setCheckoutOpened(true);
+    } catch (err) {
+      console.error("Card checkout error:", err);
+
+      setError(
+        err?.message || "Unable to open checkout. Please try again."
       );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-        <div className="flex items-start gap-3">
-          <ShieldCheck size={21} className="mt-0.5 shrink-0 text-blue-600" />
-          <div>
-            <p className="text-sm font-semibold text-blue-900">
-              Card / Bank Payment
-            </p>
-            <p className="mt-1 text-xs leading-5 text-blue-700">
-              Flutterwave payments must be verified by the Energy-Vest backend
-              before funds are credited.
-            </p>
-          </div>
-        </div>
+    <form onSubmit={handleFlutterwavePay} className="space-y-4">
+      <div>
+        <label
+          htmlFor="customer-name"
+          className="mb-2 block text-sm font-semibold text-slate-700"
+        >
+          Full name
+        </label>
+
+        <input
+          id="customer-name"
+          type="text"
+          autoComplete="name"
+          maxLength={120}
+          value={customer.name}
+          onChange={(e) =>
+            setCustomer((previous) => ({
+              ...previous,
+              name: e.target.value,
+            }))
+          }
+          placeholder="Enter your full name"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100"
+          required
+        />
       </div>
 
-      {message && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-5 text-amber-800">
-          {message}
-        </div>
+      <div>
+        <label
+          htmlFor="customer-email"
+          className="mb-2 block text-sm font-semibold text-slate-700"
+        >
+          Email address
+        </label>
+
+        <input
+          id="customer-email"
+          type="email"
+          autoComplete="email"
+          maxLength={254}
+          value={customer.email}
+          onChange={(e) =>
+            setCustomer((previous) => ({
+              ...previous,
+              email: e.target.value,
+            }))
+          }
+          placeholder="you@example.com"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100"
+          required
+        />
+      </div>
+
+      {error && <ErrorNotice message={error} />}
+
+      {checkoutOpened && (
+        <p className="text-xs leading-5 text-slate-500">
+          Complete or close the checkout window before trying again.
+        </p>
       )}
 
       <button
-        type="button"
-        onClick={handleFlutterwavePay}
+        type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>
             <Loader2 size={18} className="animate-spin" />
-            Opening Secure Checkout...
+            Opening checkout...
           </>
         ) : (
-          "Pay with Card / Bank"
+          <>
+            Continue securely
+            <ArrowRight size={18} />
+          </>
         )}
       </button>
 
       <button
         type="button"
         onClick={onClose}
-        className="w-full rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-200"
+        className="w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
       >
-        Cancel
+        Close
       </button>
+    </form>
+  );
+}
+
+function ErrorNotice({ message }) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3.5">
+      <AlertCircle
+        size={18}
+        className="mt-0.5 shrink-0 text-red-600"
+      />
+
+      <p className="text-sm leading-5 text-red-700">{message}</p>
     </div>
   );
 }

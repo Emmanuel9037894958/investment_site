@@ -1,6 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
@@ -21,49 +31,63 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:5000/api";
-
-export const dataService = {
-  getSummary: async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      throw new Error("You are not logged in. Please log in again.");
-    }
-
-    const res = await fetch(`${API_BASE}/dashboard/summary`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Failed to fetch dashboard data");
-    }
-
-    return data;
-  },
+const EMPTY_SUMMARY = {
+  cashBalance: 0,
+  totalDeposits: 0,
+  totalWithdrawals: 0,
+  totalInvested: 0,
 };
 
-export default function DashboardPage() {
-  const [summary, setSummary] = useState({
-    cashBalance: 0,
-    totalDeposits: 0,
-    totalWithdrawals: 0,
-    totalInvested: 0,
-  });
+function toAmount(value) {
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? amount : 0;
+}
 
+function formatDate(value) {
+  if (!value) return "";
+
+  const date =
+    typeof value?.toDate === "function" ? value.toDate() : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString();
+}
+
+async function readUserCollection(collectionName, uid) {
+  try {
+    const recordsQuery = query(
+      collection(db, collectionName),
+      where("userId", "==", uid),
+    );
+
+    const snapshot = await getDocs(recordsQuery);
+
+    return snapshot.docs.map((item) => ({
+      id: item.id,
+      ...item.data(),
+    }));
+  } catch (error) {
+    if (
+      error?.code === "permission-denied" ||
+      error?.code === "unavailable" ||
+      error?.code === "failed-precondition"
+    ) {
+      console.warn(`Could not load ${collectionName}:`, error.code);
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+export default function DashboardPage() {
+  const [summary, setSummary] = useState(EMPTY_SUMMARY);
   const [transactions, setTransactions] = useState([]);
   const [investments, setInvestments] = useState([]);
-
   const [performance, setPerformance] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const [userName, setUserName] = useState("User");
   const [userTier, setUserTier] = useState("Investor");
@@ -73,145 +97,212 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleProfile = () => {
-    setShowProfile((prev) => !prev);
+    setShowProfile((previous) => !previous);
   };
 
   const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
+    setSidebarOpen((previous) => !previous);
   };
 
-  const fetchAllData = useCallback(async () => {
+  const fetchAllData = useCallback(async (firebaseUser) => {
     setIsLoading(true);
-    setError(null);
 
     try {
-      const data = await dataService.getSummary();
+      if (!firebaseUser) {
+        setSummary(EMPTY_SUMMARY);
+        setTransactions([]);
+        setInvestments([]);
+        setPerformance([]);
+        setUserName("User");
+        setUserTier("Investor");
+        setUserImage(null);
+        return;
+      }
 
-      if (data.user) {
-        setUserName(data.user.full_name || "User");
+      // Load the signed-in user's profile.
+      const userRef = doc(db, "users", firebaseUser.uid);
 
-        setUserTier(
-          data.user.role === "admin" ? "Administrator" : "Investor"
+      console.log("Firebase project:", db.app.options.projectId);
+      console.log("Authenticated UID:", firebaseUser.uid);
+      console.log("Profile document path:", userRef.path);
+
+      const userSnapshot = await getDoc(userRef);
+
+      console.log("Profile document exists:", userSnapshot.exists());
+
+      if (!userSnapshot.exists()) {
+        // Keep the dashboard visible if the profile is missing.
+        setSummary(EMPTY_SUMMARY);
+        setTransactions([]);
+        setInvestments([]);
+        setPerformance([]);
+
+        setUserName(firebaseUser.displayName || firebaseUser.email || "User");
+
+        setUserTier("Investor");
+        setUserImage(firebaseUser.photoURL || null);
+
+        console.warn(
+          "Firebase profile document not found for UID:",
+          firebaseUser.uid,
         );
+
+        return;
       }
 
-      if (data.summary) {
-        setSummary({
-          cashBalance: Number(data.summary.cashBalance || 0),
-          totalDeposits: Number(data.summary.totalDeposits || 0),
-          totalWithdrawals: Number(data.summary.totalWithdrawals || 0),
-          totalInvested: Number(data.summary.totalInvested || 0),
-        });
-      }
+      const profile = userSnapshot.data();
 
-      setTransactions(data.transactions || []);
-      setInvestments(data.investments || []);
+      setUserName(
+        profile.fullName ||
+          profile.full_name ||
+          firebaseUser.displayName ||
+          firebaseUser.email ||
+          "User",
+      );
 
-      /*
-        The current Node.js backend does not yet provide
-        fake performance-history data.
+      setUserImage(profile.avatarUrl || firebaseUser.photoURL || null);
 
-        We intentionally leave this empty instead of
-        inventing investment performance.
-      */
+      setUserTier(profile.role === "admin" ? "Administrator" : "Investor");
+
+      // Load investments, payments, and withdrawals.
+      const [investmentRecords, paymentRecords, withdrawalRecords] =
+        await Promise.all([
+          readUserCollection("investments", firebaseUser.uid),
+          readUserCollection("payments", firebaseUser.uid),
+          readUserCollection("withdrawals", firebaseUser.uid),
+        ]);
+
+      const balance = toAmount(profile.balance);
+
+      const totalInvested = investmentRecords
+        .filter((item) =>
+          ["active", "approved", "completed"].includes(
+            String(item.status || "").toLowerCase(),
+          ),
+        )
+        .reduce((total, item) => total + toAmount(item.amount), 0);
+
+      const totalDeposits = paymentRecords
+        .filter((item) =>
+          ["confirmed", "completed", "success", "successful"].includes(
+            String(item.status || "").toLowerCase(),
+          ),
+        )
+        .reduce((total, item) => total + toAmount(item.amount), 0);
+
+      const totalWithdrawals = withdrawalRecords
+        .filter((item) =>
+          ["approved", "completed", "paid", "successful"].includes(
+            String(item.status || "").toLowerCase(),
+          ),
+        )
+        .reduce((total, item) => total + toAmount(item.amount), 0);
+
+      setSummary({
+        cashBalance: balance,
+        totalDeposits,
+        totalWithdrawals,
+        totalInvested,
+      });
+
+      setInvestments(
+        investmentRecords.sort((a, b) => {
+          const dateA =
+            a.createdAt?.toMillis?.() ||
+            (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+
+          const dateB =
+            b.createdAt?.toMillis?.() ||
+            (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+
+          return dateB - dateA;
+        }),
+      );
+
+      const combinedTransactions = [
+        ...paymentRecords.map((item) => ({
+          ...item,
+          type: item.type || "deposit",
+        })),
+        ...withdrawalRecords.map((item) => ({
+          ...item,
+          type: item.type || "withdrawal",
+        })),
+      ];
+
+      setTransactions(
+        combinedTransactions.sort((a, b) => {
+          const dateA =
+            a.createdAt?.toMillis?.() ||
+            (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+
+          const dateB =
+            b.createdAt?.toMillis?.() ||
+            (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+
+          return dateB - dateA;
+        }),
+      );
+
+      // Do not invent historical performance.
       setPerformance([]);
-    } catch (e) {
-      console.error("Dashboard loading error:", e);
+    } catch (exception) {
+      console.error("Firebase dashboard loading error:", exception);
 
-      if (
-        e.message?.toLowerCase().includes("token") ||
-        e.message?.toLowerCase().includes("logged in")
-      ) {
-        setError("Your session has expired. Please log in again.");
-      } else {
-        setError(e.message || "Unable to load dashboard data.");
-      }
+      // Errors are logged for debugging but not displayed
+      // as a red banner on the dashboard.
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchAllData();
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      fetchAllData(firebaseUser);
+    });
+
+    return () => unsubscribe();
   }, [fetchAllData]);
 
-  // ==========================================
-  // TRADE FORM
-  // ==========================================
-
+  // Trading is not connected to a live execution service.
   const [tradeSymbol, setTradeSymbol] = useState("AAPL");
   const [tradeQty, setTradeQty] = useState(1);
   const [tradeType, setTradeType] = useState("buy");
 
   const handlePlaceOrder = () => {
-    /*
-      Trading has not been connected to the Node.js backend yet.
-
-      We intentionally do NOT show "Order executed" here,
-      because that would be fake financial activity.
-    */
-
-    alert(
-      "Trading is not connected yet. No trade was executed."
-    );
+    alert("Trading is not connected yet. No trade was executed.");
   };
 
-  // ==========================================
-  // FORMAT MONEY
-  // ==========================================
-
   const formatMoney = (amount) => {
-    return `$${Number(amount || 0).toLocaleString("en-US", {
+    return `$${toAmount(amount).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  // ==========================================
-  // RENDER
-  // ==========================================
-
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 antialiased lg:flex-row">
-      {/* ==========================================
-          MOBILE HEADER
-      ========================================== */}
-
+      {/* Mobile header */}
       <div className="flex items-center justify-between bg-indigo-600 p-4 text-white shadow-md lg:hidden">
-        <h1 className="text-lg font-semibold">
-          Investment Dashboard
-        </h1>
+        <h1 className="text-lg font-semibold">Investment Dashboard</h1>
 
         <button
           onClick={toggleSidebar}
           className="text-white outline-none"
           aria-label="Toggle sidebar"
         >
-          {sidebarOpen ? (
-            <X size={28} />
-          ) : (
-            <Menu size={28} />
-          )}
+          {sidebarOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* ==========================================
-          SIDEBAR
-      ========================================== */}
-
+      {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:static lg:w-64 lg:translate-x-0`}
       >
         <Sidebar onClose={toggleSidebar} />
       </div>
-
-      {/* ==========================================
-          MOBILE OVERLAY
-      ========================================== */}
 
       {sidebarOpen && (
         <div
@@ -220,10 +311,7 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* ==========================================
-          MAIN CONTENT
-      ========================================== */}
-
+      {/* Main dashboard */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleProfile={toggleProfile}
@@ -232,10 +320,6 @@ export default function DashboardPage() {
         />
 
         <main className="flex-1 space-y-8 overflow-y-auto bg-gray-100 p-4 md:p-8">
-          {/* ==========================================
-              PROFILE
-          ========================================== */}
-
           {showProfile && (
             <ProfileSettings
               userName={userName}
@@ -245,22 +329,7 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* ==========================================
-              ERROR
-          ========================================== */}
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-              <p className="font-semibold text-red-600">
-                {error}
-              </p>
-            </div>
-          )}
-
-          {/* ==========================================
-              REAL ACCOUNT STATISTICS
-          ========================================== */}
-
+          {/* Dashboard statistics */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               title="Available Cash Balance"
@@ -291,10 +360,7 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* ==========================================
-              ACCOUNT OVERVIEW
-          ========================================== */}
-
+          {/* Balance and investments */}
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div className="rounded-2xl bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-3">
@@ -306,43 +372,36 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-bold text-gray-900">
                     Account Balance
                   </h2>
-
                   <p className="text-sm text-gray-500">
-                    Your real available balance
+                    Your available account balance
                   </p>
                 </div>
               </div>
 
-              <p className="text-4xl font-bold text-gray-900">
-                {formatMoney(summary.cashBalance)}
-              </p>
+              {isLoading ? (
+                <p className="py-4 text-gray-500">Loading balance...</p>
+              ) : (
+                <p className="text-4xl font-bold text-gray-900">
+                  {formatMoney(summary.cashBalance)}
+                </p>
+              )}
 
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <div className="rounded-xl bg-gray-50 p-4">
-                  <p className="text-xs font-medium text-gray-500">
-                    Deposited
-                  </p>
-
+                  <p className="text-xs font-medium text-gray-500">Deposited</p>
                   <p className="mt-1 text-lg font-bold text-gray-900">
                     {formatMoney(summary.totalDeposits)}
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-gray-50 p-4">
-                  <p className="text-xs font-medium text-gray-500">
-                    Invested
-                  </p>
-
+                  <p className="text-xs font-medium text-gray-500">Invested</p>
                   <p className="mt-1 text-lg font-bold text-gray-900">
                     {formatMoney(summary.totalInvested)}
                   </p>
                 </div>
               </div>
             </div>
-
-            {/* ==========================================
-                INVESTMENTS
-            ========================================== */}
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-3">
@@ -354,9 +413,8 @@ export default function DashboardPage() {
                   <h2 className="text-lg font-bold text-gray-900">
                     Investments
                   </h2>
-
                   <p className="text-sm text-gray-500">
-                    Your real investment positions
+                    Your recorded investment positions
                   </p>
                 </div>
               </div>
@@ -372,9 +430,8 @@ export default function DashboardPage() {
                   <p className="font-medium text-gray-600">
                     No investments yet
                   </p>
-
                   <p className="mt-1 text-sm text-gray-400">
-                    Your investments will appear here after you make one.
+                    Confirmed investments will appear here.
                   </p>
                 </div>
               ) : (
@@ -386,11 +443,16 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="font-semibold text-gray-900">
-                          {investment.reference || "Investment"}
+                          {investment.reference ||
+                            investment.name ||
+                            "Investment"}
                         </p>
 
                         <p className="mt-1 text-xs text-gray-500">
-                          {investment.status || "active"}
+                          {investment.status || "pending"}
+                          {investment.createdAt
+                            ? ` · ${formatDate(investment.createdAt)}`
+                            : ""}
                         </p>
                       </div>
 
@@ -404,21 +466,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ==========================================
-              PERFORMANCE
-          ========================================== */}
-
+          {/* Performance chart */}
           <div className="grid grid-cols-1 gap-6">
-            <PerformanceChart
-              data={performance}
-              isLoading={isLoading}
-            />
+            <PerformanceChart data={performance} isLoading={isLoading} />
           </div>
 
-          {/* ==========================================
-              TRANSACTIONS
-          ========================================== */}
-
+          {/* Recent transactions */}
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
               <div className="rounded-xl bg-blue-50 p-3">
@@ -429,27 +482,21 @@ export default function DashboardPage() {
                 <h2 className="text-lg font-bold text-gray-900">
                   Recent Transactions
                 </h2>
-
                 <p className="text-sm text-gray-500">
-                  Real account transactions from MySQL
+                  Your recorded payments and withdrawals
                 </p>
               </div>
             </div>
 
             {isLoading ? (
               <div className="py-10 text-center">
-                <p className="text-sm text-gray-500">
-                  Loading transactions...
-                </p>
+                <p className="text-sm text-gray-500">Loading transactions...</p>
               </div>
             ) : transactions.length === 0 ? (
               <div className="rounded-xl border border-dashed border-gray-200 p-8 text-center">
-                <p className="font-medium text-gray-600">
-                  No transactions yet
-                </p>
-
+                <p className="font-medium text-gray-600">No transactions yet</p>
                 <p className="mt-1 text-sm text-gray-400">
-                  Your deposits, withdrawals and investments will appear here.
+                  Your recorded deposits and withdrawals will appear here.
                 </p>
               </div>
             ) : (
@@ -460,15 +507,12 @@ export default function DashboardPage() {
                       <th className="pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Type
                       </th>
-
                       <th className="pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Amount
                       </th>
-
                       <th className="pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Status
                       </th>
-
                       <th className="pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Reference
                       </th>
@@ -478,7 +522,7 @@ export default function DashboardPage() {
                   <tbody>
                     {transactions.slice(0, 10).map((transaction) => (
                       <tr
-                        key={transaction.id}
+                        key={`${transaction.type}-${transaction.id}`}
                         className="border-b border-gray-50 last:border-0"
                       >
                         <td className="py-4">
@@ -494,11 +538,22 @@ export default function DashboardPage() {
                         <td className="py-4">
                           <span
                             className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              transaction.status === "completed"
+                              [
+                                "completed",
+                                "confirmed",
+                                "successful",
+                                "paid",
+                              ].includes(
+                                String(transaction.status || "").toLowerCase(),
+                              )
                                 ? "bg-emerald-50 text-emerald-600"
-                                : transaction.status === "failed"
-                                ? "bg-red-50 text-red-600"
-                                : "bg-amber-50 text-amber-600"
+                                : ["failed", "rejected"].includes(
+                                      String(
+                                        transaction.status || "",
+                                      ).toLowerCase(),
+                                    )
+                                  ? "bg-red-50 text-red-600"
+                                  : "bg-amber-50 text-amber-600"
                             }`}
                           >
                             {transaction.status || "pending"}
@@ -506,7 +561,9 @@ export default function DashboardPage() {
                         </td>
 
                         <td className="py-4 text-sm text-gray-500">
-                          {transaction.reference || "—"}
+                          {transaction.reference ||
+                            transaction.paymentId ||
+                            transaction.id}
                         </td>
                       </tr>
                     ))}
@@ -516,10 +573,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ==========================================
-              TRADE FORM
-          ========================================== */}
-
+          {/* Trade form */}
           <div className="grid grid-cols-1 gap-6">
             <TradeForm
               tradeSymbol={tradeSymbol}
